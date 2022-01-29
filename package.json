@@ -1,0 +1,48 @@
+{
+  "name": "react-fire-cms",
+  "version": "0.0.1",
+  "description": "A Firebase and React based CMS platform",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "author": "",
+  "module": "dist/react-fire-cms.esm.js",
+  "license": "ISC",
+  "dependencies": {
+  },
+  "peerDependencies": {
+    "react": ">=16",
+    "react-dom": ">=16"
+  },
+  "devDependencies": {
+    "@types/react-draft-wysiwyg": "^1.13.4",
+    "draft-js": "^0.11.7",
+    "draftjs-to-html": "^0.9.1",
+    "firebase": "^9.6.5",
+    "html-to-draftjs": "^1.5.0",
+    "react-draft-wysiwyg": "^1.14.7",
+    "react-icons": "^4.3.1",
+    "reactfire": "^4.2.1",
+    "@types/react": "^17.0.38",
+    "node-sass": "^7.0.1",
+    "react-hotkeys-hook": "^3.4.4",
+    "rollup-plugin-scss": "^3.0.0",
+    "tsdx": "^0.14.1",
+    "typescript": "^4.5.5",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  }
+}

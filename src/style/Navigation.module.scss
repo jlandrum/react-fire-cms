@@ -1,0 +1,49 @@
+@import './colors.scss';
+@import './effects.scss';
+
+.Navigation {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 48px;
+  background-color: fade-out($primary, 0.5);
+  @include dropShadow;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100;
+  &:before {
+    @include iOSBlur;
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+  }
+  &__Logo {
+    height: 48px;
+    width: auto;
+    &--Text {
+      font-weight: 800;
+      max-width: 400px;
+      margin-left: 16px;
+    }
+  }
+  &__User {
+    border-left: 1px solid $decor;
+    padding: 8px;
+    display: block;
+    display: flex;
+    align-items: center;
+    &__Host {
+      opacity: 0.5;
+      cursor: pointer;
+    }
+    &__Icon {
+      font-size: 10px;
+    }
+  }
+}
