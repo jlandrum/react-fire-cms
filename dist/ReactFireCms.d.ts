@@ -1,9 +1,7 @@
 import React from 'react';
-import './style/index.scss';
-import { ReactFireCmsConfig } from "./interface/ReactFireCmsConfig";
-interface ReactFireCmsProps {
-    config: ReactFireCmsConfig;
+import { CMSConfig } from "./interface/CMSConfig";
+interface ReactFireCMSProps {
+    config: CMSConfig;
 }
-export declare const useConfig: () => ReactFireCmsConfig;
-export declare const ReactFireCms: React.FC<ReactFireCmsProps>;
+export declare const ReactFireCMS: React.FC<ReactFireCMSProps>;
 export {};

@@ -1,7 +1,6 @@
 import React from 'react';
-import { useEffect, useState } from "react";
-import { ComponentDefinition } from "./Editable";
-import StringEditor from "./Editable/StringEditor";
+import { ComponentDefinition } from "../interface/ComponentDefinition";
+import ImageEditor from './editors/ImageEditor';
 
 interface ImageTextProps {
   src: string;
@@ -25,19 +24,10 @@ export const ImageTextDefinition: ComponentDefinition = {
   name: 'Image / Text',
   key: 'imageText',
   component: ImageText,
-  Editor: ({onDataSet, data}) => {
-    const parsed = JSON.parse(data);
-    const [src, setSrc] = useState(parsed?.src)
-
-    useEffect(() => {
-      onDataSet(JSON.stringify({src}));
-    }, [src]);
-
-    return (
-      <div className="RFC__EditorStyles__Editor__Form">
-        <span>Source</span>
-        <StringEditor value={parsed.src} path='' onUpdateField={(_, value) => setSrc(value)} />
-      </div>
-    )
-  }
+  Editor: ({onDataSet, data}) => (
+    <div className="RFCMS__EditorStyles__Editor__Form">
+      <span>Image URL / Text</span>
+      <ImageEditor value={data} onUpdate={onDataSet} />
+    </div>
+  )  
 }

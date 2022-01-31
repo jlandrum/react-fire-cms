@@ -1,0 +1,48 @@
+input {
+  @include innerShadow;  
+  padding: 8px;
+  border-radius: 3px;
+  border: 1px solid $decor;
+  height: 42px;
+  &:focus {
+    border: 1px solid $black;
+    outline: none;
+  }
+  margin: 2px 0;
+}
+
+select {
+  @include innerShadow;  
+  padding: 8px;
+  border-radius: 3px;
+  border: 1px solid $decor;
+  height: 42px;
+  background-color: $white;
+  appearance: none;
+  margin: 2px 0;
+  &:focus {
+    border: 1px solid $black;
+    outline: none;
+  }
+}
+
+textarea {
+  padding: 8px;
+  border-radius: 3px;
+  border: 1px solid $decor;
+  @include innerShadow;
+}
+
+label {
+  margin: 4px 0;
+}
+
+button {
+  padding: 8px;
+  border-radius: 3px;
+  border: 1px solid $decor;
+  background-color: $white;
+  font-size: 10pt;
+  height: 42px;
+  user-select: none;
+}

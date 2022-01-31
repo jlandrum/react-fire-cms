@@ -14,20 +14,20 @@ export interface DialogProps {
 export const Dialog: React.FC<DialogProps> = ({title, open, children, buttons, onClose}) => {  
   return open ? (
     <>
-      <div className='RFC__AntiClick' />
-      <div className='RFC__Dialog'>
-        <div className={'RFC__Dialog__Header'}>
+      <div className='RFCMS__AntiClick' />
+      <div className='RFCMS__Dialog'>
+        <div className={'RFCMS__Dialog__Header'}>
           {title}
-          { onClose && <IoCloseSharp onClick={onClose} className={'RFC__Dialog__Close'} />}
+          { onClose && <IoCloseSharp onClick={onClose} className={'RFCMS__Dialog__Close'} />}
         </div>
-        <div className={'RFC__Dialog__Content'}>
+        <div className={'RFCMS__Dialog__Content'}>
           {children}
         </div>
         {buttons && 
-          <div className={'RFC__Dialog__Buttons'}>
+          <div className={'RFCMS__Dialog__Buttons'}>
             { buttons?.map(it => 
               <div key={it.label} 
-                   className={`${'RFC__Dialog__Buttons__Button'} ${it.disabled && 'RFC__Dialog__Buttons__Button--disabled'} ${`RFC__Dialog__Buttons__Button--${it.type}`}`} 
+                   className={`${'RFCMS__Dialog__Buttons__Button'} ${it.disabled && 'RFCMS__Dialog__Buttons__Button--disabled'} ${`RFCMS__Dialog__Buttons__Button--${it.type}`}`} 
                    onClick={() => {
                      if (!it.disabled) { it.action() }
                    }}>{it.label}</div>)}

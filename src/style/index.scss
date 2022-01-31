@@ -1,7 +1,14 @@
 @import './colors.scss';
 @import './effects.scss';
 
-.RFC {
+.RFCMS {
   @import './Editable.scss';
   @import './Dialog.scss';
+  @import './LoginDialog.scss';
+  @import './MediaSelector.scss';
+  @import './Parallax.scss';
+  @import './EditorStyle.scss';
+
+  @import './DynamicLayout.scss';
+  @import './MenuEditor.scss';
 }

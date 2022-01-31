@@ -1,5 +1,5 @@
 import React from 'react';
-import { ComponentDefinition } from "./Editable";
+import { ComponentDefinition } from "../interface/ComponentDefinition";
 interface ImageTextProps {
     src: string;
     imageStyle?: any;

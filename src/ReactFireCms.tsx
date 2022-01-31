@@ -1,34 +1,31 @@
 import React from 'react';
-import { createContext, useContext } from 'react';
 import { FirebaseAppProvider, DatabaseProvider, AuthProvider, StorageProvider, FirestoreProvider, useFirebaseApp } from 'reactfire';
 import { getAuth } from 'firebase/auth';
 import { getDatabase } from 'firebase/database';
 import { getStorage } from 'firebase/storage';
 import { getFirestore } from 'firebase/firestore';
-import './style/index.scss';
 
 import { ParallaxDefinition } from './component/Parallax';
 import { ImageTextDefinition } from './component/ImageText';
-import { ReactFireCmsConfig } from "./interface/ReactFireCmsConfig"
+import { CMSConfig } from "./interface/CMSConfig"
+import { useConfig } from './hooks';
+import { ConfigContext } from './ConfigContext';
 
-interface ReactFireCmsProps {
-  config: ReactFireCmsConfig;
+interface ReactFireCMSProps {
+  config: CMSConfig;
 }
 
-const ConfigContext = createContext(null as unknown as ReactFireCmsConfig);
-
-const mergeConfig = (config: ReactFireCmsConfig) => ({
+const mergeConfig = (config: CMSConfig) => ({
   ...config,
   components: [
     ...config.components,
     ParallaxDefinition,
-    ImageTextDefinition,
+    ImageTextDefinition,   
   ]
 })
 
 const FirebaseProvider: React.FC = ({children}) => {
   const firebaseConfig = useConfig();
-  
   return (
     <FirebaseAppProvider firebaseConfig={firebaseConfig.firebase.config}>
       {children}
@@ -56,16 +53,14 @@ const FirebaseComponents: React.FC = ({children}) => {
   )
 }
 
-export const useConfig = () => useContext(ConfigContext);
-
-export const ReactFireCms: React.FC<ReactFireCmsProps> = ({config, children}) => {
-  return (
+export const ReactFireCMS: React.FC<ReactFireCMSProps> = ({config, children}) => {
+  if (true) return (
     <ConfigContext.Provider value={mergeConfig(config)}>
       <FirebaseProvider>
         <FirebaseComponents>
           {children}
         </FirebaseComponents>
       </FirebaseProvider>
-    </ConfigContext.Provider> 
-  )
+    </ConfigContext.Provider>
+  );
 }

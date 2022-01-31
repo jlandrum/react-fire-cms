@@ -4,6 +4,7 @@
 &__Editable {
   position: relative;
   display: inherit;
+  
   &:before {
     position: absolute;
     left: 50%;
@@ -23,6 +24,7 @@
   &--Preview:before {
     opacity: 0;
   }
+  &__Trash, 
   &__Pencil {
     position: absolute;
     top: 2px;
@@ -40,11 +42,6 @@
     border: 1px solid transparent;
     cursor: pointer;
     z-index: 10000;
-    &--Highlight {
-      opacity: 1;
-      border: 1px solid $blue;
-      transform: translate(-50%, -50%) scale(1.5);
-    }
     &--Preview {
       opacity: 0;
     }
@@ -53,6 +50,22 @@
     }
     &__Text {
       font-size: 9pt;
+    }
+  }
+  &__Trash {
+    right: 0;
+    left: auto;
+    &--Highlight {
+      opacity: 1;
+      border: 1px solid $red;
+      transform: translate(-50%, 50%) scale(1.5);
+    }
+  }
+  &__Pencil {
+    &--Highlight {
+      opacity: 1;
+      border: 1px solid $blue;
+      transform: translate(50%, 50%) scale(1.5);
     }
   }
   &__Dialog {
@@ -81,9 +94,11 @@
     }
     &__Image {
       display: flex;
+      align-items: center;
       input {
         flex-grow: 1;
       }
+      button { margin-left: 8px }
     }    
   }
 }

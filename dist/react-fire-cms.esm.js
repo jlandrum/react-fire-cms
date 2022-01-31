@@ -1,13 +1,13 @@
-import React, { useState, useCallback, useEffect, useMemo, createRef, useContext, createContext } from 'react';
-import { useStorage, FirebaseAppProvider, useFirebaseApp, AuthProvider, DatabaseProvider, StorageProvider, FirestoreProvider, useUser, useFirestore, useFirestoreDocData, useAuth } from 'reactfire';
+import React, { createContext, useMemo, useContext, useState, useCallback, useEffect, createRef } from 'react';
+import { useFirestore, useFirestoreDocData, useUser as useUser$1, useStorage, FirebaseAppProvider, useFirebaseApp, AuthProvider, DatabaseProvider, StorageProvider, FirestoreProvider, useAuth } from 'reactfire';
 import { getAuth, setPersistence, browserSessionPersistence, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getDatabase } from 'firebase/database';
 import { listAll, ref, getDownloadURL, getStorage } from 'firebase/storage';
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
-import { IoCloseSharp } from 'react-icons/io5';
+import { doc, getFirestore, setDoc, deleteDoc } from 'firebase/firestore';
+import { IoCloseSharp, IoCloseCircle } from 'react-icons/io5';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { FaPencilAlt } from 'react-icons/fa';
+import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { ContentState, EditorState, convertToRaw } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import draftToHtml from 'draftjs-to-html';
@@ -38,22 +38,22 @@ var Dialog = function Dialog(_ref) {
       buttons = _ref.buttons,
       onClose = _ref.onClose;
   return open ? React.createElement(React.Fragment, null, React.createElement("div", {
-    className: 'RFC__AntiClick'
+    className: 'RFCMS__AntiClick'
   }), React.createElement("div", {
-    className: 'RFC__Dialog'
+    className: 'RFCMS__Dialog'
   }, React.createElement("div", {
-    className: 'RFC__Dialog__Header'
+    className: 'RFCMS__Dialog__Header'
   }, title, onClose && React.createElement(IoCloseSharp, {
     onClick: onClose,
-    className: 'RFC__Dialog__Close'
+    className: 'RFCMS__Dialog__Close'
   })), React.createElement("div", {
-    className: 'RFC__Dialog__Content'
+    className: 'RFCMS__Dialog__Content'
   }, children), buttons && React.createElement("div", {
-    className: 'RFC__Dialog__Buttons'
+    className: 'RFCMS__Dialog__Buttons'
   }, buttons == null ? void 0 : buttons.map(function (it) {
     return React.createElement("div", {
       key: it.label,
-      className: 'RFC__Dialog__Buttons__Button' + " " + (it.disabled && 'RFC__Dialog__Buttons__Button--disabled') + " " + ("RFC__Dialog__Buttons__Button--" + it.type),
+      className: 'RFCMS__Dialog__Buttons__Button' + " " + (it.disabled && 'RFCMS__Dialog__Buttons__Button--disabled') + " " + ("RFCMS__Dialog__Buttons__Button--" + it.type),
       onClick: function onClick() {
         if (!it.disabled) {
           it.action();
@@ -61,6 +61,48 @@ var Dialog = function Dialog(_ref) {
       }
     }, it.label);
   })))) : null;
+};
+
+var ConfigContext = /*#__PURE__*/createContext(null);
+
+var useField = function useField(path, key) {
+  var storage = useFirestore();
+  var document = doc(storage, path);
+
+  var _useFirestoreDocData = useFirestoreDocData(document),
+      data = _useFirestoreDocData.data;
+
+  return useMemo(function () {
+    return data == null ? void 0 : data[key];
+  }, [data]);
+};
+var useDocument = function useDocument(path) {
+  var storage = useFirestore();
+  var document = doc(storage, "" + path);
+
+  var _useFirestoreDocData2 = useFirestoreDocData(document),
+      data = _useFirestoreDocData2.data;
+
+  console.error(Object.keys(data || {}), data);
+  return {
+    data: data,
+    pageExists: Object.keys(data || {}).length > 0
+  };
+};
+var useConfig = function useConfig() {
+  return useContext(ConfigContext);
+};
+var useUser = function useUser() {
+  var auth = useUser$1();
+
+  return useMemo(function () {
+    var _auth$data;
+
+    return {
+      user: auth == null ? void 0 : auth.data,
+      userExists: !!(auth != null && (_auth$data = auth.data) != null && _auth$data.email)
+    };
+  }, [auth]);
 };
 
 var FirebaseImage = function FirebaseImage(props) {
@@ -80,13 +122,13 @@ var FirebaseImage = function FirebaseImage(props) {
     onClick: function onClick() {
       return onSelect(url);
     },
-    className: "RFC__MediaSelector__Item " + (selected && 'RFC__MediaSelector__Item--Selected')
+    className: "RFCMS__MediaSelector__Item " + (selected && 'RFCMS__MediaSelector__Item--Selected')
   }, React.createElement("img", {
     src: url,
     alt: image == null ? void 0 : image.name,
-    className: "RFC__MediaSelector__Item__Image"
+    className: "RFCMS__MediaSelector__Item__Image"
   }), React.createElement("span", {
-    className: "RFC__MediaSelector__Item__Text"
+    className: "RFCMS__MediaSelector__Item__Text"
   }, image == null ? void 0 : image.name));
 };
 
@@ -155,9 +197,9 @@ var MediaSelector = function MediaSelector(_ref) {
       return setOpen(false);
     }
   }, error && React.createElement("span", {
-    className: "RFC__TextStyles__Error"
+    className: "RFCMS__TextStyles__Error"
   }, error), React.createElement("div", {
-    className: "RFC__MediaSelector__Grid"
+    className: "RFCMS__MediaSelector__Grid"
   }, items.map(function (item, index) {
     return React.createElement(FirebaseImage, {
       onSelect: function onSelect(url) {
@@ -171,34 +213,28 @@ var MediaSelector = function MediaSelector(_ref) {
 };
 
 var ImageEditor = function ImageEditor(_ref) {
-  var onUpdateField = _ref.onUpdateField,
-      path = _ref.path,
+  var onUpdate = _ref.onUpdate,
       value = _ref.value;
   return React.createElement("div", {
-    className: "RFC__Editable__Dialog__Image"
+    className: "RFCMS__Editable__Dialog__Image"
   }, React.createElement("input", {
     onChange: function onChange(e) {
-      return onUpdateField(path, e.target.value);
+      return onUpdate(e.target.value);
     },
-    id: path,
     value: value
   }), React.createElement(MediaSelector, {
-    onSelect: function onSelect(v) {
-      return onUpdateField(path, v);
-    }
+    onSelect: onUpdate
   }));
 };
 
 var NumberEditor = function NumberEditor(_ref) {
-  var onUpdateField = _ref.onUpdateField,
-      path = _ref.path,
+  var onUpdate = _ref.onUpdate,
       value = _ref.value;
   return React.createElement(React.Fragment, null, React.createElement("input", {
     type: 'number',
     onChange: function onChange(e) {
-      return onUpdateField(path, e.target.value);
+      return onUpdate(e.target.value);
     },
-    id: path,
     value: value
   }));
 };
@@ -227,9 +263,9 @@ var Parallax = function Parallax(_ref) {
   }, [scrollHandler]);
   return React.createElement("div", {
     ref: ref,
-    className: "RFC__Parallax"
+    className: "RFCMS__Parallax"
   }, React.createElement("div", {
-    className: "RFC__Parallax__Inner",
+    className: "RFCMS__Parallax__Inner",
     style: {
       backgroundImage: "url(" + src + ")",
       width: "100%",
@@ -241,56 +277,33 @@ var Parallax = function Parallax(_ref) {
 
 var ParallaxDefinition = {
   name: 'Parallax',
-  key: 'Parallax',
+  key: 'parallax',
   component: Parallax,
   Editor: function Editor(_ref2) {
     var onDataSet = _ref2.onDataSet,
         data = _ref2.data;
-    var parsed = JSON.parse(data || '{}');
 
-    var _useState2 = useState((parsed == null ? void 0 : parsed.src) || ''),
-        src = _useState2[0],
-        setSrc = _useState2[1];
+    var update = function update(src, zoom) {
+      onDataSet({
+        src: src || data.src,
+        zoom: zoom || data.zoom
+      });
+    };
 
-    var _useState3 = useState((parsed == null ? void 0 : parsed.zoom) || '0'),
-        zoom = _useState3[0],
-        setZoom = _useState3[1];
-
-    useEffect(function () {
-      onDataSet(JSON.stringify({
-        src: src,
-        zoom: zoom
-      }));
-    }, [src, zoom]);
     return React.createElement("div", {
-      className: "RFC__EditorStyles__Editor__Form"
+      className: "RFCMS__EditorStyles__Editor__Form"
     }, React.createElement("span", null, "Source"), React.createElement(ImageEditor, {
-      value: parsed.src,
-      path: '',
-      onUpdateField: function onUpdateField(_, value) {
-        return setSrc(value);
+      value: data == null ? void 0 : data.src,
+      onUpdate: function onUpdate(s) {
+        return update(s);
       }
     }), React.createElement("span", null, "Zoom"), React.createElement(NumberEditor, {
-      value: parsed.zoom,
-      path: '',
-      onUpdateField: function onUpdateField(_, value) {
-        return setZoom(value);
+      value: data == null ? void 0 : data.zoom,
+      onUpdate: function onUpdate(z) {
+        return update(undefined, z);
       }
     }));
   }
-};
-
-var StringEditor = function StringEditor(_ref) {
-  var onUpdateField = _ref.onUpdateField,
-      path = _ref.path,
-      value = _ref.value;
-  return React.createElement(React.Fragment, null, React.createElement("input", {
-    onChange: function onChange(e) {
-      return onUpdateField(path, e.target.value);
-    },
-    id: path,
-    value: value
-  }));
 };
 
 var ImageText = function ImageText(_ref) {
@@ -323,30 +336,14 @@ var ImageTextDefinition = {
   Editor: function Editor(_ref2) {
     var onDataSet = _ref2.onDataSet,
         data = _ref2.data;
-    var parsed = JSON.parse(data);
-
-    var _useState = useState(parsed == null ? void 0 : parsed.src),
-        src = _useState[0],
-        setSrc = _useState[1];
-
-    useEffect(function () {
-      onDataSet(JSON.stringify({
-        src: src
-      }));
-    }, [src]);
     return React.createElement("div", {
-      className: "RFC__EditorStyles__Editor__Form"
-    }, React.createElement("span", null, "Source"), React.createElement(StringEditor, {
-      value: parsed.src,
-      path: '',
-      onUpdateField: function onUpdateField(_, value) {
-        return setSrc(value);
-      }
+      className: "RFCMS__EditorStyles__Editor__Form"
+    }, React.createElement("span", null, "Image URL / Text"), React.createElement(ImageEditor, {
+      value: data,
+      onUpdate: onDataSet
     }));
   }
 };
-
-var ConfigContext = /*#__PURE__*/createContext(null);
 
 var mergeConfig = function mergeConfig(config) {
   return _extends({}, config, {
@@ -380,10 +377,7 @@ var FirebaseComponents = function FirebaseComponents(_ref2) {
   }, children))));
 };
 
-var useConfig = function useConfig() {
-  return useContext(ConfigContext);
-};
-var ReactFireCms = function ReactFireCms(_ref3) {
+var ReactFireCMS = function ReactFireCMS(_ref3) {
   var config = _ref3.config,
       children = _ref3.children;
   return React.createElement(ConfigContext.Provider, {
@@ -391,67 +385,200 @@ var ReactFireCms = function ReactFireCms(_ref3) {
   }, React.createElement(FirebaseProvider, null, React.createElement(FirebaseComponents, null, children)));
 };
 
+var StringEditor = function StringEditor(_ref) {
+  var onUpdate = _ref.onUpdate,
+      value = _ref.value;
+  return React.createElement(React.Fragment, null, React.createElement("input", {
+    onChange: function onChange(e) {
+      return onUpdate(e.target.value);
+    },
+    value: value
+  }));
+};
+
 var LongFormEditor = function LongFormEditor(_ref) {
-  var onUpdateField = _ref.onUpdateField,
-      path = _ref.path,
+  var onUpdate = _ref.onUpdate,
       value = _ref.value;
   var blocks = htmlToDraft(value);
   var state = ContentState.createFromBlockArray(blocks.contentBlocks, blocks.entityMap);
   var editorState = EditorState.createWithContent(state);
   return React.createElement(React.Fragment, null, React.createElement("div", {
-    className: "RFC__Editable__Dialog__RichEditor"
+    className: "RFCMS__Editable__Dialog__RichEditor"
   }, React.createElement(Editor, {
     defaultEditorState: editorState,
     onEditorStateChange: function onEditorStateChange(e) {
-      onUpdateField(path, draftToHtml(convertToRaw(e.getCurrentContent())));
+      onUpdate(draftToHtml(convertToRaw(e.getCurrentContent())));
     }
   })));
 };
 
 var ComponentEditor = function ComponentEditor(_ref) {
-  var _rfcConfig$components;
+  var _config$components$fi;
 
-  var onUpdateField = _ref.onUpdateField,
-      path = _ref.path,
+  var onUpdate = _ref.onUpdate,
       value = _ref.value;
-  var input = JSON.parse(value || '{}');
-  var rfcConfig = useConfig();
+  var config = useConfig();
+  var component = value == null ? void 0 : value.component;
+  var props = value == null ? void 0 : value.props;
 
-  var _useState = useState(input.component || ''),
-      component = _useState[0],
-      setComponent = _useState[1];
+  var update = function update(component, props) {
+    onUpdate({
+      component: component || (value == null ? void 0 : value.component),
+      props: props || (value == null ? void 0 : value.props)
+    });
+  };
 
-  var _useState2 = useState(input.data || '{}'),
-      data = _useState2[0],
-      setData = _useState2[1];
-
-  useEffect(function () {
-    var output = {
-      component: component,
-      data: data
-    };
-    onUpdateField(path, JSON.stringify(output));
-  }, [data, component]);
-  var onOptionSelect = useCallback(function (e) {
-    setComponent(e.target.value);
-  }, []);
-  var onDataSet = useCallback(function (data) {
-    setData(data);
-  }, []);
-  var Editor = (_rfcConfig$components = rfcConfig.components.find(function (it) {
+  var Editor = (_config$components$fi = config.components.find(function (it) {
     return it.key === component;
-  })) == null ? void 0 : _rfcConfig$components.Editor;
+  })) == null ? void 0 : _config$components$fi.Editor;
   return React.createElement(React.Fragment, null, React.createElement("select", {
     value: component,
-    onChange: onOptionSelect
-  }, React.createElement("option", null, "Select a Component"), rfcConfig.components.map(function (c) {
+    onChange: function onChange(e) {
+      return update(e.target.value);
+    }
+  }, React.createElement("option", null, "Select a Component"), config.components.map(function (c, i) {
     return React.createElement("option", {
+      key: c.key + "_" + i,
       value: c.key
     }, c.name);
   })), Editor && React.createElement(Editor, {
-    onDataSet: onDataSet,
-    data: data
+    onDataSet: function onDataSet(data) {
+      return update(undefined, data);
+    },
+    data: props
   }));
+};
+
+var DynamicLayout = function DynamicLayout(_ref) {
+  var cells = _ref.cells;
+  return React.createElement(React.Fragment, null, cells == null ? void 0 : cells.map == null ? void 0 : cells.map(function (comp) {
+    return React.createElement(DynamicComponent, {
+      content: comp.description
+    });
+  }));
+};
+var DynamicLayoutDefinition = {
+  name: 'DynamicLayout',
+  key: 'dynamicLayout',
+  component: DynamicLayout,
+  Editor: function Editor(_ref2) {
+    var onDataSet = _ref2.onDataSet,
+        data = _ref2.data;
+    var addRow = useCallback(function (e) {
+      e.preventDefault();
+      onDataSet([].concat(data || [], [{
+        description: {
+          component: undefined,
+          props: {}
+        },
+        size: '100%'
+      }]));
+    }, [data]);
+    var removeItemAt = useCallback(function (index) {
+      var after = [].concat(data.slice(0, index), data.slice(index + 1));
+      onDataSet(after);
+    }, [data]);
+    var replaceItemAt = useCallback(function (index, description, size) {
+      var after = [].concat(data.slice(0, index), [{
+        description: description || data[index].description,
+        size: size || data[index].size
+      }], data.slice(index + 1));
+      onDataSet(after);
+    }, [data]);
+    return React.createElement("div", {
+      className: "RFCMS__EditorStyles__Editor__Form"
+    }, React.createElement("button", {
+      onClick: addRow
+    }, "Add Row"), React.createElement("div", null, data == null ? void 0 : data.map(function (it, index) {
+      return React.createElement("div", {
+        key: index + "_",
+        className: "RFCMS__DynamicLayout__Editor"
+      }, React.createElement("div", {
+        className: "RFCMS__DynamicLayout__Editor__Header"
+      }, React.createElement("label", null, "Size (See guide for accepted formats)"), React.createElement(StringEditor, {
+        value: it.size,
+        onUpdate: function onUpdate(data) {
+          return replaceItemAt(index, undefined, data);
+        }
+      }), React.createElement(IoCloseCircle, {
+        className: "RFCMS__DynamicLayout__Editor__Header__Delete",
+        onClick: function onClick() {
+          return removeItemAt(index);
+        }
+      })), React.createElement(DynamicComponentDefinition.Editor, {
+        onDataSet: function onDataSet(data) {
+          return replaceItemAt(index, data);
+        },
+        data: it.description
+      }));
+    })));
+  }
+};
+
+var LinkReferenceEditor = function LinkReferenceEditor(_ref) {
+  var onUpdate = _ref.onUpdate,
+      value = _ref.value;
+
+  var updateValue = function updateValue(content, url) {
+    onUpdate({
+      content: content || value.content,
+      url: url || value.url
+    });
+  };
+
+  return React.createElement(React.Fragment, null, React.createElement("input", {
+    onChange: function onChange(e) {
+      return updateValue(e.target.value);
+    },
+    value: value.content
+  }), React.createElement("input", {
+    onChange: function onChange(e) {
+      return updateValue(undefined, e.target.value);
+    },
+    value: value.url
+  }));
+};
+
+var MenuEditor = function MenuEditor(_ref) {
+  var onUpdate = _ref.onUpdate,
+      value = _ref.value;
+  var addRow = useCallback(function (e) {
+    e.preventDefault();
+    onUpdate([].concat(value || [], [{
+      url: '',
+      content: ''
+    }]));
+  }, [value]);
+  var removeItemAt = useCallback(function (index) {
+    var after = [].concat(value.slice(0, index), value.slice(index + 1));
+    onUpdate(after);
+  }, [value]);
+  var replaceItemAt = useCallback(function (index, data) {
+    var after = [].concat(value.slice(0, index), [_extends({}, data)], value.slice(index + 1));
+    onUpdate(after);
+  }, [value]);
+  return React.createElement("div", {
+    className: "RFCMS__EditorStyles__Editor__Form"
+  }, React.createElement("button", {
+    onClick: addRow
+  }, "Add Menu Item"), React.createElement("div", null, value == null ? void 0 : value.map(function (it, index) {
+    return React.createElement("div", {
+      key: index + "_",
+      className: "RFCMS__MenuEditor__Editor"
+    }, React.createElement("div", {
+      className: "RFCMS__MenuEditor__Editor__Row"
+    }, React.createElement(LinkReferenceEditor, {
+      onUpdate: function onUpdate(data) {
+        return replaceItemAt(index, data);
+      },
+      value: it
+    }), React.createElement(IoCloseCircle, {
+      className: "RFCMS__DynamicLayout__Editor__Header__Delete",
+      onClick: function onClick() {
+        return removeItemAt(index);
+      }
+    })));
+  })));
 };
 
 var EditableDialog = function EditableDialog(_ref) {
@@ -476,13 +603,14 @@ var EditableDialog = function EditableDialog(_ref) {
       var _data$data;
 
       var current = p;
-      current[c.name] = ((_data$data = data.data) == null ? void 0 : _data$data[c.name]) || '';
+      current[c.name] = ((_data$data = data.data) == null ? void 0 : _data$data[c.name]) || undefined;
       return current;
     }, {}));
   }, [fields, data]);
 
   var submitChanges = function submitChanges(e) {
     e == null ? void 0 : e.preventDefault();
+    console.error('Submitting: ', toSubmit);
     setDoc(document, toSubmit, {
       merge: true
     }).then(onClose)["catch"](function (e) {
@@ -510,29 +638,57 @@ var EditableDialog = function EditableDialog(_ref) {
     switch (field.type) {
       case 'string':
         return React.createElement(StringEditor, {
-          onUpdateField: updateField,
-          path: field.name,
+          onUpdate: function onUpdate(v) {
+            return updateField(field.name, v);
+          },
           value: toSubmit[field.name]
         });
 
       case 'image':
-        return React.createElement(ImageEditor, {
-          onUpdateField: updateField,
-          path: field.name,
-          value: toSubmit[field.name]
+        return React.createElement(ImageTextDefinition.Editor, {
+          onDataSet: function onDataSet(v) {
+            return updateField(field.name, v);
+          },
+          data: toSubmit[field.name]
         });
 
       case 'longform':
         return React.createElement(LongFormEditor, {
-          onUpdateField: updateField,
-          path: field.name,
+          onUpdate: function onUpdate(v) {
+            return updateField(field.name, v);
+          },
           value: toSubmit[field.name]
         });
 
       case 'component':
         return React.createElement(ComponentEditor, {
-          onUpdateField: updateField,
-          path: field.name,
+          onUpdate: function onUpdate(v) {
+            return updateField(field.name, v);
+          },
+          value: toSubmit[field.name]
+        });
+
+      case 'dynamicLayout':
+        return React.createElement(DynamicLayoutDefinition.Editor, {
+          onDataSet: function onDataSet(v) {
+            return updateField(field.name, v);
+          },
+          data: toSubmit[field.name]
+        });
+
+      case 'url':
+        return React.createElement(LinkReferenceEditor, {
+          onUpdate: function onUpdate(v) {
+            return updateField(field.name, v);
+          },
+          value: toSubmit[field.name]
+        });
+
+      case 'menu':
+        return React.createElement(MenuEditor, {
+          onUpdate: function onUpdate(v) {
+            return updateField(field.name, v);
+          },
           value: toSubmit[field.name]
         });
 
@@ -549,16 +705,16 @@ var EditableDialog = function EditableDialog(_ref) {
   }, {
     buttons: buttons
   }), open && React.createElement("form", {
-    className: "RFC__Editable__Dialog",
+    className: "RFCMS__Editable__Dialog",
     onSubmit: submitChanges
   }, React.createElement("span", {
     className: 'Text__Error'
   }, error), fields == null ? void 0 : fields.map(function (field) {
     return React.createElement("div", {
       key: field.name,
-      className: "RFC__Editable__Dialog__Field"
+      className: "RFCMS__Editable__Dialog__Field"
     }, React.createElement("div", {
-      className: "RFC__Editable__Dialog__Label"
+      className: "RFCMS__Editable__Dialog__Label"
     }, field.hint || field.name), renderEditor(field));
   })));
 };
@@ -569,7 +725,7 @@ var Editable = function Editable(_ref2) {
       path = _ref2.path,
       className = _ref2.className,
       children = _ref2.children;
-  var user = useUser();
+  var user = useUser$1();
 
   var _useState3 = useState(false),
       shown = _useState3[0],
@@ -603,7 +759,7 @@ var Editable = function Editable(_ref2) {
   });
   return user.data ? React.createElement("div", {
     style: style,
-    className: className + " RFC__Editable " + (preview && 'RFC__Editable--Preview')
+    className: className + " RFCMS__Editable " + (preview && 'RFCMS__Editable--Preview')
   }, children, React.createElement(EditableDialog, {
     path: path,
     open: shown,
@@ -612,12 +768,12 @@ var Editable = function Editable(_ref2) {
       return setShown(false);
     }
   }), React.createElement("div", {
-    className: "RFC__Editable__Pencil " + (highlight && 'RFC__Editable__Pencil--Highlight') + " " + (preview && 'RFC__Editable__Pencil--Preview')
+    className: "RFCMS__Editable__Pencil " + (highlight && 'RFCMS__Editable__Pencil--Highlight') + " " + (preview && 'RFCMS__Editable__Pencil--Preview')
   }, React.createElement(FaPencilAlt, {
     onClick: function onClick() {
       return setShown(true);
     },
-    className: "RFC__Editable__Pencil__Text"
+    className: "RFCMS__Editable__Pencil__Text"
   }))) : React.createElement(React.Fragment, null, children);
 };
 
@@ -628,9 +784,8 @@ var DynamicComponent = function DynamicComponent(_ref) {
       className = _ref.className,
       style = _ref.style;
   var config = useConfig();
-  var parsed = JSON.parse(content || '{}');
-  var component = parsed == null ? void 0 : parsed.component;
-  var props = JSON.parse((parsed == null ? void 0 : parsed.data) || '{}');
+  var component = content == null ? void 0 : content.component;
+  var props = (content == null ? void 0 : content.props) || {};
   var Component = (_config$components$fi = config.components.find(function (it) {
     return it.key === component;
   })) == null ? void 0 : _config$components$fi.component;
@@ -638,6 +793,109 @@ var DynamicComponent = function DynamicComponent(_ref) {
     className: className,
     style: style
   })) : React.createElement(React.Fragment, null);
+};
+var DynamicComponentDefinition = {
+  name: 'Dynamic Component',
+  key: 'dynamicComponent',
+  component: DynamicComponent,
+  Editor: function Editor(_ref2) {
+    var onDataSet = _ref2.onDataSet,
+        data = _ref2.data;
+    return React.createElement("div", {
+      className: "RFCMS__EditorStyles__Editor__Form"
+    }, React.createElement("span", null, "Component"), React.createElement(ComponentEditor, {
+      value: data,
+      onUpdate: onDataSet
+    }));
+  }
+};
+
+var Delete = function Delete(_ref) {
+  var open = _ref.open,
+      identity = _ref.identity,
+      onClose = _ref.onClose,
+      onDelete = _ref.onDelete;
+  var doDelete = useCallback(function () {
+    onDelete().then(onClose);
+  }, [onDelete, onClose]);
+  var buttons = [{
+    label: 'Cancel',
+    action: function action() {
+      return onClose == null ? void 0 : onClose();
+    }
+  }, {
+    label: 'Delete',
+    action: doDelete,
+    type: 'warning'
+  }];
+  return React.createElement(Dialog, {
+    title: "Delete " + identity,
+    open: open,
+    onClose: onClose,
+    buttons: buttons
+  }, "Do you wish to delete ", identity);
+};
+
+var Deleter = function Deleter(_ref) {
+  var style = _ref.style,
+      className = _ref.className,
+      path = _ref.path,
+      children = _ref.children;
+
+  var _useUser = useUser(),
+      userExists = _useUser.userExists;
+
+  var _useState = useState(false),
+      shown = _useState[0],
+      setShown = _useState[1];
+
+  var _useState2 = useState(false),
+      highlight = _useState2[0],
+      setHighlight = _useState2[1];
+
+  var _useState3 = useState(false),
+      preview = _useState3[0],
+      setPreview = _useState3[1];
+
+  var firestore = useFirestore();
+  useHotkeys('e', function () {
+    setHighlight(true);
+  });
+  useHotkeys('e', function () {
+    setHighlight(false);
+  }, {
+    keydown: false,
+    keyup: true
+  });
+  useHotkeys('p', function () {
+    setPreview(true);
+  });
+  useHotkeys('p', function () {
+    setPreview(false);
+  }, {
+    keydown: false,
+    keyup: true
+  });
+  return userExists ? React.createElement("div", {
+    style: style,
+    className: className + " RFCMS__Editable " + (preview && 'RFCMS__Editable--Preview')
+  }, React.createElement(Delete, {
+    open: shown,
+    identity: "this page",
+    onClose: function onClose() {
+      return setShown(false);
+    },
+    onDelete: function onDelete() {
+      return deleteDoc(doc(firestore, path));
+    }
+  }), React.createElement("div", {
+    className: "RFCMS__Editable__Trash " + (highlight && 'RFCMS__Editable__Trash--Highlight') + "  " + (preview && 'RFCMS__Editable__Pencil--Preview')
+  }, React.createElement(FaTrash, {
+    onClick: function onClick() {
+      return setShown(true);
+    },
+    className: "RFCMS__Editable__Pencil__Text"
+  }))) : React.createElement(React.Fragment, null, children);
 };
 
 var Login = function Login(_ref) {
@@ -670,7 +928,7 @@ var Login = function Login(_ref) {
     buttons: buttons
   }, React.createElement("form", {
     onSubmit: doLogin,
-    className: "RFC__LoginDialog__Content"
+    className: "RFCMS__LoginDialog__Content"
   }, React.createElement("label", {
     htmlFor: "email"
   }, "Email"), React.createElement("input", {
@@ -719,5 +977,5 @@ var Logout = function Logout(_ref) {
   }, "Are you sure you wish to logout?");
 };
 
-export { Dialog, DynamicComponent, Editable, ImageText, ImageTextDefinition, Login, Logout, ReactFireCms, useConfig };
+export { Deleter, Dialog, DynamicComponent, DynamicComponentDefinition, DynamicLayout, DynamicLayoutDefinition, Editable, ImageText, ImageTextDefinition, Login, Logout, ReactFireCMS, useConfig, useDocument, useField, useUser };
 //# sourceMappingURL=react-fire-cms.esm.js.map

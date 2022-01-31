@@ -1,0 +1,30 @@
+@import './colors.scss';
+
+&__DynamicLayout__Editor {
+  &__Header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+    background-color: $fog;
+    border: 1px solid $decor;
+    border-bottom: 0;
+    border-radius: 4px 4px 0 0;
+    margin-bottom: -8px;
+    padding: 4px;
+    padding-bottom: 8px;
+    input {
+      flex-grow: 1;
+      margin: 0 16px;
+    }
+    &__Delete {
+      font-size: 24px;
+      transition: all 300ms;
+      cursor: pointer;
+      margin-right: 4px;
+      &:hover {
+        color: $selected;
+      }
+    }    
+  }
+}

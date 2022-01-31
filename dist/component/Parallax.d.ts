@@ -1,9 +1,2 @@
-import React from 'react';
-import { ComponentDefinition } from "./Editable";
-interface ParallaxProps {
-    src: string;
-    zoom: number;
-}
-declare const Parallax: React.FC<ParallaxProps>;
+import { ComponentDefinition } from "../interface";
 export declare const ParallaxDefinition: ComponentDefinition;
-export default Parallax;

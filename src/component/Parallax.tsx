@@ -1,8 +1,8 @@
 import React from 'react';
 import { createRef, useCallback, useEffect, useState } from "react";
-import { ComponentDefinition } from "./Editable";
-import ImageEditor from "./Editable/ImageEditor";
-import NumberEditor from "./Editable/NumberEditor";
+import { ComponentDefinition } from "../interface";
+import ImageEditor from "./editors/ImageEditor";
+import NumberEditor from "./editors/NumberEditor";
 
 interface ParallaxProps {
   src: string;
@@ -25,8 +25,8 @@ const Parallax: React.FC<ParallaxProps> = ({src, zoom}) => {
   }, [scrollHandler]);
 
   return (
-    <div ref={ref} className="RFC__Parallax">
-      <div className="RFC__Parallax__Inner" 
+    <div ref={ref} className="RFCMS__Parallax">
+      <div className="RFCMS__Parallax__Inner" 
            style={{backgroundImage: `url(${src})`, 
                   width: `100%`,
                   height: `calc(100% + ${zoom * 2}px)`,
@@ -39,26 +39,23 @@ const Parallax: React.FC<ParallaxProps> = ({src, zoom}) => {
 
 export const ParallaxDefinition: ComponentDefinition = {
   name: 'Parallax',
-  key: 'Parallax',
+  key: 'parallax',
   component: Parallax,
   Editor: ({onDataSet, data}) => {
-    const parsed = JSON.parse(data || '{}');
-    const [src, setSrc] = useState(parsed?.src || '')
-    const [zoom, setZoom] = useState(parsed?.zoom || '0')
-
-    useEffect(() => {
-      onDataSet(JSON.stringify({src, zoom}));
-    }, [src, zoom]);
+    const update = (src?: string, zoom?: string) => {
+      onDataSet({
+        src: src || data.src, 
+        zoom: zoom || data.zoom
+      });
+    };
 
     return (
-      <div className="RFC__EditorStyles__Editor__Form">
+      <div className="RFCMS__EditorStyles__Editor__Form">
         <span>Source</span>
-        <ImageEditor value={parsed.src} path='' onUpdateField={(_, value) => setSrc(value)} />
+        <ImageEditor value={data?.src} onUpdate={s => update(s)} />
         <span>Zoom</span>
-        <NumberEditor value={parsed.zoom} path='' onUpdateField={(_, value) => setZoom(value)} />
+        <NumberEditor value={data?.zoom} onUpdate={z => update(undefined, z)} />
       </div>
     )
   }
 }
-
-export default Parallax;

@@ -1,10 +1,10 @@
 import React from 'react';
 
-export type OnDataSet = (data: string) => void;
+export type OnDataSet = (data: any) => void;
 
-export interface ComponentDefinition {
+export interface ComponentDefinition<T = any> {
   name: string;
   key: string;
   component: any;
-  Editor: React.FC<{onDataSet: OnDataSet, data: string}>;
+  Editor: React.FC<{onDataSet: OnDataSet, data: T, meta?: T}>;
 }

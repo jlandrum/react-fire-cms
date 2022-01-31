@@ -5,6 +5,7 @@ module.exports = {
     config.plugins.unshift(
       scss(),
     );
+    config.output.esModule = true;
     return config;
   },
 };

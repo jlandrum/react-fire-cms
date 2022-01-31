@@ -24,7 +24,7 @@ export const Login: React.FC<LoginProps> = ({open, onClose}) => {
   return (
     <Dialog title="Login" open={open} onClose={onClose} buttons={buttons}>
       <form onSubmit={doLogin}
-            className="RFC__LoginDialog__Content">
+            className="RFCMS__LoginDialog__Content">
         <label htmlFor="email">Email</label>
         <input value={email} onChange={v => setEmail(v.target.value)} type="email" id="email" />
         <label htmlFor="password">Password</label>

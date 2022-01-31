@@ -1,0 +1,10 @@
+&__LoginDialog {
+  &__Label {
+    padding: 8px;
+  }
+  &__Content {
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+  }
+}

@@ -1,0 +1,19 @@
+@import './colors.scss';
+
+&__EditorStyles {
+  &__Editor {
+    &__Form {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid $decor;
+      padding: 4px;
+      border-radius: 4px;
+      background-color: $fog;
+      margin-top: 4px;
+      &__Label {
+        display: flex;
+        justify-content: space-between;
+      }
+    }
+  }
+}
